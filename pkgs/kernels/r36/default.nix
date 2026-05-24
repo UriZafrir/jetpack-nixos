@@ -105,6 +105,36 @@ buildLinux (args // {
     # Restore default LSM from security/Kconfig. Undoes Nvidia downstream changes.
     LSM = freeform "landlock,lockdown,yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,bpf";
 
+    # === Cilium eBPF Base Requirements ===
+    BPF = yes;
+    BPF_EVENTS = yes;
+    BPF_SYSCALL = yes;
+    NET_CLS_BPF = lib.mkDefault yes;
+    BPF_JIT = yes;
+    NET_CLS_ACT = yes;
+    NET_SCH_INGRESS = yes;
+    CRYPTO_SHA1 = yes;
+    CRYPTO_USER_API_HASH = yes;
+    CGROUPS = yes;
+    CGROUP_BPF = yes;
+    PERF_EVENTS = yes;
+    SCHEDSTATS = yes;
+
+    # === For VXLAN/Geneve Tunneling ===
+    VXLAN = yes;
+    GENEVE = yes;
+    FIB_RULES = yes;
+
+    # === For L7/FQDN Policies (TPROXY) ===
+    NETFILTER_XT_TARGET_TPROXY = module;
+    NETFILTER_XT_TARGET_MARK = module;
+    NETFILTER_XT_TARGET_CT = module;
+    # NETFILTER_XT_MATCH_MARK already defined above
+    NETFILTER_XT_MATCH_SOCKET = module;
+
+    # === For Bandwidth Manager ===
+    NET_SCH_FQ = module;
+
   } // (import ../common-arch.nix { inherit lib; })
   // lib.optionalAttrs realtime {
     PREEMPT_VOLUNTARY = lib.mkForce no; # Disable the one set in common-config.nix
